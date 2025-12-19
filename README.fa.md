@@ -156,3 +156,66 @@ RESTful API باید:
 | Status codes     | ❌        |
 | DTO              | ❌        |
 | Error model      | ❌        |
+
+<hr/>
+
+### 1️⃣ درحقیقت Resource-based URLها
+
+❌ فعلی یا قبلی ها:
+```http request
+/account/save.do
+/account/findByEmail.do
+
+```
+
+✅ RESTful:
+- Resource = accounts
+
+- استفاده از جمع برای منابع
+
+- QueryParam برای فیلترها
+
+مثال:
+
+```http request
+POST   /accounts           → Create new account
+GET    /accounts           → Get all accounts (optionally filter)
+GET    /accounts/{id}      → Get account by ID
+GET    /accounts?email=x   → Filter by email
+GET    /accounts?balanceMin=1000   → Filter by balance
+
+```
+
+### 2️⃣در واقع HTTP Method Semantics
+
+| Action | HTTP Method |
+| ------ | ----------- |
+| Create | POST        |
+| Read   | GET         |
+| Update | PUT / PATCH |
+| Delete | DELETE      |
+
+### 3️⃣ Request Body / Path / Query
+- POST/PUT/PATCH → @RequestBody
+
+- GET → @PathVariable یا @RequestParam
+
+### 4️⃣ Status Codes
+
+| Status          | Meaning                             |
+| --------------- | ----------------------------------- |
+| 200 OK          | موفقیت برای GET                     |
+| 201 Created     | ایجاد موفقیت‌آمیز                   |
+| 204 No Content  | Delete موفق یا Update بدون Response |
+| 400 Bad Request | Validation Error                    |
+| 404 Not Found   | Resource پیدا نشد                   |
+
+<hr/>
+
+## اینکه چرا RestControllerAdvice رو توی پکیج api.error ساختم و توی پکیج exception نگذاشتم
+
+خلاصه‌ی خیلی کوتاه
+👉 چون @RestControllerAdvice بخشی از لایه‌ی API است، نه Domain.
+اما Exceptionها متعلق به Domain / Application هستند.
+
+حالا بازش می‌کنیم 👇
