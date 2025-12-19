@@ -221,3 +221,114 @@ GET    /accounts?balanceMin=1000   → Filter by balance
 اما Exceptionها متعلق به Domain / Application هستند.
 
 حالا بازش می‌کنیم 👇
+
+### 1️⃣ اصل طلایی: هر چیز در لایه‌ی خودش
+در معماری تمیز (Clean / Layered):
+| لایه             | مسئولیت                 |
+| ---------------- | ----------------------- |
+| API (Controller) | HTTP, Status Code, JSON |
+| Service          | Business Logic          |
+| Domain           | Model + Rules           |
+| Persistence      | DB                      |
+
+❓ واقعا @RestControllerAdvice ً چیکار می‌کند؟
+
+- در واقع HTTP Status تعیین می‌کند
+
+- و Response JSON می‌سازد
+
+- و Request URI را می‌خواند
+
+- و به Web Layer وابسته است (HttpServletRequest)
+
+📌 یعنی:
+
+❌ بدون وب معنی ندارد
+
+❌ بدون REST بی‌استفاده است
+
+پس:
+
+این یک Web / API concern است
+
+### 2️⃣ و Exceptionها چرا در پکیج exception؟
+
+Exception چیست؟
+
+- بیان یک وضعیت غیرعادی در Domain یا Application
+
+- مستقل از این‌که:
+
+  - REST باشیم
+
+  - GraphQL باشیم
+
+  - Batch job باشیم
+
+مثلاً:
+
+```java
+throw new AccountNotFoundException(...)
+
+```
+
+📌 این:
+
+نه HTTP می‌شناسد
+
+نه Status Code
+
+نه JSON
+
+✔ فقط می‌گوید: «Account وجود ندارد»
+
+### 3️⃣ اگر ControllerAdvice را در exception بگذاریم چه می‌شود؟
+
+❌ مشکل معماری
+```text
+exception
+ ├── AccountNotFoundException
+ └── GlobalExceptionHandler   ❌
+
+```
+
+چرا بده؟
+
+- Web layer به Domain قاطی می‌شود
+
+- بعداً اگر:
+
+  - API عوض شود
+
+  - gRPC اضافه شود
+
+  - REST حذف شود
+
+همه‌چیز به هم می‌ریزد.
+
+
+### 4️⃣ ساختار پیشنهادی حرفه‌ای
+
+```text
+org.j2os
+ ├── api
+ │   ├── controller
+ │   └── error
+ │       ├── ApiError
+ │       └── GlobalExceptionHandler
+ │
+ ├── service
+ │
+ ├── exception
+ │   └── AccountNotFoundException
+ │
+ └── repository
+
+```
+
+
+
+📌 خیلی تمیز
+📌 قابل توسعه
+📌 قابل تست
+📌 مصاحبه‌پسند
