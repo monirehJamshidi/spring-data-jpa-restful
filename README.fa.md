@@ -215,7 +215,9 @@ GET    /accounts?balanceMin=1000   → Filter by balance
 ## اینکه چرا RestControllerAdvice رو توی پکیج api.error ساختم و توی پکیج exception نگذاشتم
 
 خلاصه‌ی خیلی کوتاه
+
 👉 چون @RestControllerAdvice بخشی از لایه‌ی API است، نه Domain.
+
 اما Exceptionها متعلق به Domain / Application هستند.
 
 حالا بازش می‌کنیم 👇
