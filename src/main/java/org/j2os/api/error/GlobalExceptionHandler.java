@@ -2,6 +2,7 @@ package org.j2os.api.error;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.j2os.exception.ResourceNotFoundException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,6 +63,21 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLocking(
+            RuntimeException ex,
+            HttpServletRequest request
+    ){
+        ApiError error = new ApiError(
+                HttpStatus.CONTINUE.value(),
+                "Optimistic Locking Failure",
+                ex.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(

@@ -3,13 +3,16 @@ package org.j2os.service;
 import lombok.RequiredArgsConstructor;
 import org.j2os.api.dto.AccountCreateRequest;
 import org.j2os.api.dto.AccountResponse;
+import org.j2os.api.dto.AccountUpdateRequest;
 import org.j2os.entity.Account;
 import org.j2os.exception.ResourceNotFoundException;
 import org.j2os.repository.AccountRepository;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -77,14 +80,33 @@ public class AccountService {
     }
 
     //UPDATE
-    public Account update(String id, Account account){
-        Account existng = accountRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found" + id));
+    public AccountResponse updateAccount(UUID id, AccountUpdateRequest request){
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Account with " + id + " not found"
+                        )
+                );
 
-        existng.setAccountBalance(account.getAccountBalance());
-        existng.setAccountOwnerName(account.getAccountOwnerName());
-        existng.setAccountOwnerMail(account.getAccountOwnerMail());
-        existng.setAccountOwnerAddress(account.getAccountOwnerAddress());
-        return accountRepository.save(existng);
+        // optimistic locking check
+//        if (account.getVersion() != null && !account.getVersion().equals(request.version())){
+//            throw new OptimisticLockingFailureException(
+//                    "Account was modified by another transaction"
+//            );
+//        }
+
+        account.setAccountBalance(request.accountBalance());
+        account.setAccountOwnerName(request.accountOwnerName());
+        account.setAccountOwnerMail(request.accountOwnerMail());
+        account.setAccountOwnerAddress(request.accountOwnerAddress());
+
+        Account updated = accountRepository.save(account);
+
+        return new AccountResponse(
+                updated.getAccountId(),
+                updated.getAccountBalance(),
+                updated.getAccountOwnerName(),
+                updated.getAccountOwnerMail()
+        );
     }
 }

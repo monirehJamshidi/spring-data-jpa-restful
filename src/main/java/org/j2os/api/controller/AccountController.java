@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.j2os.api.dto.AccountCreateRequest;
 import org.j2os.api.dto.AccountResponse;
+import org.j2os.api.dto.AccountUpdateRequest;
 import org.j2os.entity.Account;
 import org.j2os.service.AccountService;
 import org.springframework.http.HttpStatus;
@@ -54,11 +55,10 @@ public class AccountController {
 
     //UPDATE(PUT)
     @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(
-            @PathVariable("id") String id,
-            @RequestBody Account account
+    public AccountResponse updateAccount(
+            @PathVariable UUID id,
+            @Valid @RequestBody AccountUpdateRequest request
     ){
-        Account updated = accountService.update(id, account);
-        return ResponseEntity.ok(updated);
+        return accountService.updateAccount(id, request);
     }
 }

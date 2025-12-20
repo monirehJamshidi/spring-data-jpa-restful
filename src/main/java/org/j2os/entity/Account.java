@@ -20,6 +20,9 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID accountId;
 
+    @Version
+    private Long version;
+
     private Long accountBalance;
 
     @Size(min = 2, max = 10, message = "{account.owner.name.size}")
