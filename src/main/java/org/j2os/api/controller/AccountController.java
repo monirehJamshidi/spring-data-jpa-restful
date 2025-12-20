@@ -1,7 +1,10 @@
-package org.j2os.api;
+package org.j2os.api.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.j2os.api.dto.AccountCreateRequest;
+import org.j2os.api.dto.AccountResponse;
 import org.j2os.entity.Account;
 import org.j2os.service.AccountService;
 import org.springframework.http.HttpStatus;
@@ -20,9 +23,10 @@ public class AccountController {
 
     //CREATE
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account){
-        Account savedAccount = accountService.save(account);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAccount);
+    @ResponseStatus(HttpStatus.CREATED)
+    public AccountResponse createAccount(@Valid @RequestBody AccountCreateRequest request){
+        return accountService.createAccount(request);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(savedAccount);
     }
 
     //READ all
@@ -37,10 +41,8 @@ public class AccountController {
 
     //READ by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable UUID id){
-        return accountService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public AccountResponse getAccountById(@PathVariable UUID id){
+        return accountService.getAccountById(id);
     }
 
     //DELETE

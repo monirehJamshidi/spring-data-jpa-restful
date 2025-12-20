@@ -2,10 +2,10 @@ package org.j2os.api.error;
 
 import java.time.LocalDateTime;
 
-public record ApiError(
+public record   ApiError(
         int status,
         String error,
-        String message,
+        Object message,
         String path,
         LocalDateTime timestamp
 ) {

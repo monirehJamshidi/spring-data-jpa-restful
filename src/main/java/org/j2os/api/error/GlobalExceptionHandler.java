@@ -1,26 +1,35 @@
 package org.j2os.api.error;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.j2os.exception.AccountNotFoundException;
+import org.j2os.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.View;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(AccountNotFoundException.class)
+    private final View error;
+
+    public GlobalExceptionHandler(View error) {
+        this.error = error;
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleAccountNotFound(
-            AccountNotFoundException ex,
+            ResourceNotFoundException ex,
             HttpServletRequest request
     ) {
         ApiError error = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                "Resource Not Found",
                 ex.getMessage(),
                 request.getRequestURI(),
                 LocalDateTime.now()
@@ -34,16 +43,25 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
+        Map<String,String> errors = new HashMap<>();
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        errors.put(error.getField(), error.getDefaultMessage())
+                );
+
         ApiError error = new ApiError(
                 HttpStatus.BAD_REQUEST.value(),
                 "Valition Errror",
-                ex.getBindingResult().getFieldError().getDefaultMessage(),
+                errors,
                 request.getRequestURI(),
                 LocalDateTime.now()
                 );
 
         return ResponseEntity.badRequest().body(error);
     }
+
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(
