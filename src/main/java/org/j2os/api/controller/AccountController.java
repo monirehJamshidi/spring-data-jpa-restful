@@ -42,8 +42,12 @@ public class AccountController {
 
     //READ by ID
     @GetMapping("/{id}")
-    public AccountResponse getAccountById(@PathVariable UUID id){
-        return accountService.getAccountById(id);
+    public ResponseEntity<AccountResponse> getAccountById(@PathVariable UUID id){
+        AccountResponse response = accountService.getAccountById(id);
+
+        return ResponseEntity.ok()
+                .eTag("\"" + response.version() + "\"")
+                .body(response);
     }
 
     //DELETE
@@ -55,10 +59,15 @@ public class AccountController {
 
     //UPDATE(PUT)
     @PutMapping("/{id}")
-    public AccountResponse updateAccount(
+    public ResponseEntity<AccountResponse> updateAccount(
             @PathVariable UUID id,
+            @RequestHeader("If-Match") String ifMatch,
             @Valid @RequestBody AccountUpdateRequest request
     ){
-        return accountService.updateAccount(id, request);
+        AccountResponse updated = accountService.updateAccount(id, ifMatch, request);
+
+        return ResponseEntity.ok()
+                .eTag("\"" + updated.version() + "\"")
+                .body(updated);
     }
 }

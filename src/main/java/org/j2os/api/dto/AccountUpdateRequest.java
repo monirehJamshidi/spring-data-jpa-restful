@@ -16,8 +16,5 @@ public record AccountUpdateRequest(
         String accountOwnerMail,
 
         @NotBlank(message = "Address is required")
-        String accountOwnerAddress,
-
-        @NotNull(message = "Version is required")
-        Long version
+        String accountOwnerAddress
 ) {}

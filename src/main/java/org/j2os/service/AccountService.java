@@ -5,6 +5,7 @@ import org.j2os.api.dto.AccountCreateRequest;
 import org.j2os.api.dto.AccountResponse;
 import org.j2os.api.dto.AccountUpdateRequest;
 import org.j2os.entity.Account;
+import org.j2os.exception.PreconditionFailedException;
 import org.j2os.exception.ResourceNotFoundException;
 import org.j2os.repository.AccountRepository;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -36,12 +37,15 @@ public class AccountService {
 
         Account saved = accountRepository.save(account);
 
-        return new AccountResponse(
-                saved.getAccountId(),
-                saved.getAccountBalance(),
-                saved.getAccountOwnerName(),
-                saved.getAccountOwnerMail()
-        );
+
+//        return new AccountResponse(
+//                saved.getAccountId(),
+//                saved.getAccountBalance(),
+//                saved.getAccountOwnerName(),
+//                saved.getAccountOwnerMail(),
+//        );
+
+        return AccountResponse.from(saved);
     }
 
     // READ all with optional filters
@@ -65,12 +69,14 @@ public class AccountService {
                                 "Account with id " + id + " not found"
                         )
                 );
-        return new AccountResponse(
-                account.getAccountId(),
-                account.getAccountBalance(),
-                account.getAccountOwnerName(),
-                account.getAccountOwnerMail()
-        );
+//        return new AccountResponse(
+//                account.getAccountId(),
+//                account.getAccountBalance(),
+//                account.getAccountOwnerName(),
+//                account.getAccountOwnerMail()
+//        );
+
+        return AccountResponse.from(account);
     }
 
     //DELETE
@@ -80,7 +86,10 @@ public class AccountService {
     }
 
     //UPDATE
-    public AccountResponse updateAccount(UUID id, AccountUpdateRequest request){
+    public AccountResponse updateAccount(
+            UUID id,
+            String ifMatch,
+            AccountUpdateRequest request){
         Account account = accountRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -88,12 +97,15 @@ public class AccountService {
                         )
                 );
 
+        Long clientVersion = Long.valueOf(ifMatch.replace("\"", ""));
+
+
         // optimistic locking check
-//        if (account.getVersion() != null && !account.getVersion().equals(request.version())){
-//            throw new OptimisticLockingFailureException(
-//                    "Account was modified by another transaction"
-//            );
-//        }
+        if (account.getVersion() != null && !account.getVersion().equals(clientVersion)){
+            throw new PreconditionFailedException( //OptimisticLockingFailureException(
+                    "Account was modified by another transaction"
+            );
+        }
 
         account.setAccountBalance(request.accountBalance());
         account.setAccountOwnerName(request.accountOwnerName());
@@ -102,11 +114,13 @@ public class AccountService {
 
         Account updated = accountRepository.save(account);
 
-        return new AccountResponse(
-                updated.getAccountId(),
-                updated.getAccountBalance(),
-                updated.getAccountOwnerName(),
-                updated.getAccountOwnerMail()
-        );
+//        return new AccountResponse(
+//                updated.getAccountId(),
+//                updated.getAccountBalance(),
+//                updated.getAccountOwnerName(),
+//                updated.getAccountOwnerMail()
+//        );
+
+        return AccountResponse.from(updated);
     }
 }

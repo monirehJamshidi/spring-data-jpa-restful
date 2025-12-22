@@ -1,12 +1,14 @@
 package org.j2os.api.error;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.j2os.exception.PreconditionFailedException;
 import org.j2os.exception.ResourceNotFoundException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.View;
 
@@ -69,7 +71,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ){
         ApiError error = new ApiError(
-                HttpStatus.CONTINUE.value(),
+                HttpStatus.CONFLICT.value(),
                 "Optimistic Locking Failure",
                 ex.getMessage(),
                 request.getRequestURI(),
@@ -79,6 +81,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    @ExceptionHandler(PreconditionFailedException.class)
+    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    public ApiError handlePreconditionFailed(
+            PreconditionFailedException ex,
+            HttpServletRequest request
+    ){
+        return new ApiError(
+                HttpStatus.PRECONDITION_FAILED.value(),
+                HttpStatus.PRECONDITION_FAILED.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(
             Exception ex,
