@@ -8,6 +8,9 @@ import org.j2os.api.dto.AccountResponse;
 import org.j2os.api.dto.AccountUpdateRequest;
 import org.j2os.entity.Account;
 import org.j2os.service.AccountService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +35,12 @@ public class AccountController {
 
     //READ all
     @GetMapping
-    public ResponseEntity<List<Account>> getAccounts(
+    public Page<AccountResponse> getAccounts(
             @RequestParam(required = false) Long balanceMin,
-            @RequestParam(required = false) String email
+            @RequestParam(required = false) String email,
+            @PageableDefault(size = 10, sort = "accountId") Pageable pageable
     ){
-        List<Account> accounts = accountService.getAccounts(balanceMin, email);
-        return ResponseEntity.ok(accounts);
+        return accountService.getAccounts(balanceMin, email, pageable);
     }
 
     //READ by ID
