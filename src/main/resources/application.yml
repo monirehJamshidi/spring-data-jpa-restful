@@ -8,6 +8,7 @@ spring:
     password: 123456
 
   jpa:
+#    database-platform: org.hibernate.dialect.OracleLegacyDialect
     open-in-view: false
     show-sql: true
     hibernate:
