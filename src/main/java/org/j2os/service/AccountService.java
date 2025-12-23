@@ -82,7 +82,13 @@ public class AccountService {
     //DELETE
     @Transactional
     public void deleteById(UUID id){
-        accountRepository.deleteById(id);
+        Account account = accountRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Account with id " + id + " not found"
+                                )
+                        );
+        accountRepository.delete(account);
     }
 
     //UPDATE

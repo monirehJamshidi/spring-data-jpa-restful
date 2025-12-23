@@ -52,9 +52,9 @@ public class AccountController {
 
     //DELETE
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable UUID id){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(@PathVariable UUID id){
         accountService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
     //UPDATE(PUT)
